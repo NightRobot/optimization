@@ -137,7 +137,7 @@ def sort_wvm(data):
 	return data
 
 def readData(file) :
-	wb = load_workbook(filename='Data.xlsx')
+	wb = load_workbook(filename=file)
 	servers = []
 	days = []
 	vm = []
