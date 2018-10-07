@@ -164,8 +164,8 @@ if __name__ == "__main__":
 	a = find_sum_workload(workload)
 	B = find_max_of_each_server(a)
 	print("before move")
-	pprint(a)
-	pprint(B)
+	# pprint(a)
+	# pprint(B)
 
 	"""
 	print("avg")
@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
 	save = iteration_calculate(workload)
 
-	print("iteration done!!!")
+	# print("iteration done!!!")
 
 	print("select vm to best move in iteration")
 	select = save[0]
