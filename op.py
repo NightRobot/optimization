@@ -159,7 +159,7 @@ def readData(file) :
 
 
 if __name__ == "__main__":
-	workload = readData("Data.xlsx")
+	workload = readData("data/Data.xlsx")
 	# print(workload)
 	a = find_sum_workload(workload)
 	B = find_max_of_each_server(a)
