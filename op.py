@@ -6,6 +6,7 @@ from pprint import pprint
 
 SERVERS = 4
 DAYS = 3
+NUMBER_OF_ITERATION = 0
 
 def find_sum_workload(workload) :
     tmp = 0
@@ -87,7 +88,6 @@ def iteration_calculate(workload):
 	            MAX_WORKLOAD_OF_SERVER_CURRENT = MAX_WORKLOAD_OF_SERVER_NEW
 	        # print("current workload compare ",MAX_WORKLOAD_OF_SERVER_CURRENT)
 	        # combination loop to test selection
-	        tmp_workload = 0
 	        vm_list = []
 	#         print(combination[select_num])
 	        # print("old a")    
@@ -161,91 +161,95 @@ def readData(file) :
 if __name__ == "__main__":
 	workload = readData("data/Data.xlsx")
 	# print(workload)
-	a = find_sum_workload(workload)
-	B = find_max_of_each_server(a)
-	print("before move")
-	# pprint(a)
-	# pprint(B)
 
-	"""
-	print("avg")
-	avg_WVM = find_avg_of_wvm_per_server(workload)
-	print(avg_WVM)
-	
-	print("sort")
-	sort_avg_WVM = sort_wvm(avg_WVM)
-	print(sort_avg_WVM)
-	"""
+	# keyboard input number of iteration
+	NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
+	for i in range(NUMBER_OF_ITERATION) :
+		a = find_sum_workload(workload)
+		B = find_max_of_each_server(a)
+		# print("before move")
+		# pprint(a)
+		# pprint(B)
 
-	# Maximum workload P
-	P = max(B)
-	index_serverP = B.index(P)
-	# print(P)
-	# print(index_serverP)
-	# Minimum wokload Q
-	
-	Q = min(B)
-	index_serverQ = B.index(Q)
-	# print(Q)
-	# print(index_serverQ)
-	
-	print("running iteration!!!")
+		"""
+		print("avg")
+		avg_WVM = find_avg_of_wvm_per_server(workload)
+		print(avg_WVM)
+		
+		print("sort")
+		sort_avg_WVM = sort_wvm(avg_WVM)
+		print(sort_avg_WVM)
+		"""
 
-	save = iteration_calculate(workload)
+		# Maximum workload P
+		P = max(B)
+		index_serverP = B.index(P)
+		# print(P)
+		# print(index_serverP)
+		# Minimum wokload Q
+		
+		Q = min(B)
+		index_serverQ = B.index(Q)
+		# print(Q)
+		# print(index_serverQ)
+		
+		print("running iteration "+str(i)+ "!!!")
 
-	# print("iteration done!!!")
+		save = iteration_calculate(workload)
 
-	print("select vm to best move in iteration")
-	select = save[0]
-	compare = []
-	for i in range(len(save)):
-	    compare = save[i]
-	#     print(select[1],"vs",compare[1])
-	    if select[1] > compare[1] :
-	        select = compare
+		# print("iteration done!!!")
 
-	print(select)
+		print("select vm to best move in iteration")
+		select = save[0]
+		compare = []
+		for i in range(len(save)):
+			compare = save[i]
+		#     print(select[1],"vs",compare[1])
+			if select[1] > compare[1] :
+				select = compare
 
-	select_vm = select[0]
-	print("select vm ",select_vm)
+		print(select)
 
-	print("move vm instruction")
-	
+		select_vm = select[0]
+		print("select vm ",select_vm)
 
-	### move vm from serverP to serverQ
-	vm_to_move = []
-	wvm = 0
-	vm_move_in_serverP_per_days = []
-	for j in range(len(workload[index_serverP])) :
-	    # print("j",j)
-	    for k in range(len(select_vm)) :
-	        # print("k",k)
-	        # print(select_vm[k])
-	        wvm = workload[index_serverP][j][select_vm[k]]
-	        # print(wvm)
-	        vm_to_move.append([ select_vm[k] ,workload[index_serverP][j][select_vm[k]] ])
+		# print("move vm instruction")
+		
 
-	        # move
+		### move vm from serverP to serverQ
+		vm_to_move = []
+		wvm = 0
+		vm_move_in_serverP_per_days = []
+		for j in range(len(workload[index_serverP])) :
+			# print("j",j)
+			for k in range(len(select_vm)) :
+				# print("k",k)
+				# print(select_vm[k])
+				wvm = workload[index_serverP][j][select_vm[k]]
+				# print(wvm)
+				vm_to_move.append([ select_vm[k] ,workload[index_serverP][j][select_vm[k]] ])
 
-	        workload[index_serverQ][j].append(wvm)
-	        wvm = 0
-	    vm_move_in_serverP_per_days.append(vm_to_move)
-	    vm_to_move = []
+				# move
 
-	# pprint(vm_move_in_serverP_per_days)
-	### remove vm from serverP
-	for j in range(len(vm_move_in_serverP_per_days)) :
-		# print(vm_move_in_serverP_per_days[j])
-		for k in range(len(vm_move_in_serverP_per_days[j])):
-			# print(vm_move_in_serverP_per_days[j][k])
-			# remove
-			workload[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
-	        
-	a = find_sum_workload(workload)
-	print("after move ")
-	# a = workload.sum(axis=2)
-	pprint(a) # calculate aij
-	B = find_max_of_each_server(a)
-	# B = np.amax(a,axis=1)
-	pprint(B) # bij
-	# pprint(vm_move_in_serverP_per_days)
+				workload[index_serverQ][j].append(wvm)
+				wvm = 0
+			vm_move_in_serverP_per_days.append(vm_to_move)
+			vm_to_move = []
+
+		# pprint(vm_move_in_serverP_per_days)
+		### remove vm from serverP
+		for j in range(len(vm_move_in_serverP_per_days)) :
+			# print(vm_move_in_serverP_per_days[j])
+			for k in range(len(vm_move_in_serverP_per_days[j])):
+				# print(vm_move_in_serverP_per_days[j][k])
+				# remove
+				workload[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
+				
+		a = find_sum_workload(workload)
+		print("after move ")
+		# a = workload.sum(axis=2)
+		pprint(a) # calculate aij
+		B = find_max_of_each_server(a)
+		# B = np.amax(a,axis=1)
+		pprint(B) # bij
+		# pprint(vm_move_in_serverP_per_days)
