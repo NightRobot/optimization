@@ -1,7 +1,7 @@
 import random
 import numpy as np
 from itertools import combinations
-from openpyxl import load_workbook
+from openpyxl import load_workbook,Workbook
 from pprint import pprint
 
 SERVERS = 4
@@ -157,6 +157,16 @@ def readData(file) :
 	# pprint(servers)
 	return servers
 
+def write_file(workload) :
+	wb = load_workbook(filename=file)
+	ws = wb.create_sheet()
+	for i in range(len(workload)):
+		worksheet = ws.add_worksheet()
+		for j in range(len(workload[i])):
+			for k in range(len(workload[i][j])):
+				worksheet.write(j,k, workload[i][j][k])
+	# save the file
+	wb.save('new_big_file.xlsx') 
 
 if __name__ == "__main__":
 	workload = readData("data/Data.xlsx")
@@ -244,7 +254,12 @@ if __name__ == "__main__":
 				# print(vm_move_in_serverP_per_days[j][k])
 				# remove
 				workload[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
-				
+
+
+		print("new workload")		
+		pprint(workload)
+
+
 		a = find_sum_workload(workload)
 		print("after move ")
 		# a = workload.sum(axis=2)
