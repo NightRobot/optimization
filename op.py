@@ -215,7 +215,7 @@ if __name__ == "__main__":
 		print(select)
 
 		select_vm = select[0]
-		print("select vm ",select_vm)
+		# print("select vm ",select_vm)
 
 		# print("move vm instruction")
 		
