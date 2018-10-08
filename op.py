@@ -256,8 +256,8 @@ if __name__ == "__main__":
 				workload[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
 
 
-		print("new workload")		
-		pprint(workload)
+		# print("new workload")		
+		# pprint(workload)
 
 
 		a = find_sum_workload(workload)
