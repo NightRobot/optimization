@@ -201,7 +201,7 @@ if __name__ == "__main__":
 		print("select vm to best move in iteration")
 		# pprint(save)
 		if len(save) == 0 :
-			print("can's move vm for best max")
+			print("can't move vm for best max")
 			break
 
 		select = save[0]
