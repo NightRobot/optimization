@@ -73,7 +73,7 @@ def iteration_calculate(workload):
 	VM_in_serverP = len(workload[index_serverP][0])
 	save = []
 	# print("move ",index_serverP,"to ",index_serverQ)
-	for q in range(VM_in_serverP):
+	for q in range(1):
 	    # print("select vms ",q+1)
 	    # Combination algorithms
 	    # list of Combination data use to select vm in server p
@@ -191,7 +191,7 @@ if __name__ == "__main__":
 		index_serverQ = B.index(Q)
 		# print(Q)
 		# print(index_serverQ)
-		
+		print("move from ",index_serverP,"to ",index_serverQ)
 		print("running iteration "+str(i)+ "!!!")
 
 		save = iteration_calculate(workload)
@@ -199,6 +199,7 @@ if __name__ == "__main__":
 		# print("iteration done!!!")
 
 		print("select vm to best move in iteration")
+		pprint(save)
 		select = save[0]
 		compare = []
 		for i in range(len(save)):
@@ -245,8 +246,8 @@ if __name__ == "__main__":
 				workload[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
 
 
-		print("new workload")		
-		pprint(workload)
+		# print("new workload")		
+		# pprint(workload)
 
 
 		a = find_sum_workload(workload)
