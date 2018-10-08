@@ -156,18 +156,7 @@ def readData(file) :
 		days = []
 	# pprint(servers)
 	return servers
-
-def write_file(workload) :
-	wb = load_workbook(filename=file)
-	ws = wb.create_sheet()
-	for i in range(len(workload)):
-		worksheet = ws.add_worksheet()
-		for j in range(len(workload[i])):
-			for k in range(len(workload[i][j])):
-				worksheet.write(j,k, workload[i][j][k])
-	# save the file
-	wb.save('new_big_file.xlsx') 
-
+	
 if __name__ == "__main__":
 	workload = readData("data/Data.xlsx")
 	# print(workload)
