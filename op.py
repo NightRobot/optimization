@@ -199,7 +199,11 @@ if __name__ == "__main__":
 		# print("iteration done!!!")
 
 		print("select vm to best move in iteration")
-		pprint(save)
+		# pprint(save)
+		if len(save) == 0 :
+			print("can's move vm for best max")
+			break
+
 		select = save[0]
 		compare = []
 		for i in range(len(save)):
