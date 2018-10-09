@@ -7,7 +7,7 @@ from pprint import pprint
 SERVERS = 4
 DAYS = 3
 NUMBER_OF_ITERATION = 0
-
+NUMBRE_VM_TO_MOVE = 2
 def find_sum_workload(workload) :
     tmp = 0
     a = [[0 for j in range(len(workload[i]))] for i in range(len(workload))] 
@@ -73,7 +73,7 @@ def iteration_calculate(workload):
 	VM_in_serverP = len(workload[index_serverP][0])
 	save = []
 	# print("move ",index_serverP,"to ",index_serverQ)
-	for q in range(1):
+	for q in range(NUMBRE_VM_TO_MOVE):
 	    # print("select vms ",q+1)
 	    # Combination algorithms
 	    # list of Combination data use to select vm in server p
@@ -163,6 +163,7 @@ if __name__ == "__main__":
 
 	# keyboard input number of iteration
 	NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
+	NUMBRE_VM_TO_MOVE = int(input("Number of VM to move : "))
 	for i in range(NUMBER_OF_ITERATION) :
 		a = find_sum_workload(workload)
 		B = find_max_of_each_server(a)
