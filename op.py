@@ -7,7 +7,7 @@ from pprint import pprint
 SERVERS = 4
 DAYS = 3
 NUMBER_OF_ITERATION = 0
-NUMBRE_VM_TO_MOVE = 2
+NUMBER_VM_TO_MOVE = 2
 def find_sum_workload(workload) :
     tmp = 0
     a = [[0 for j in range(len(workload[i]))] for i in range(len(workload))] 
@@ -73,7 +73,7 @@ def iteration_calculate(workload):
 	VM_in_serverP = len(workload[index_serverP][0])
 	save = []
 	# print("move ",index_serverP,"to ",index_serverQ)
-	for q in range(NUMBRE_VM_TO_MOVE):
+	for q in range(NUMBER_VM_TO_MOVE):
 	    # print("select vms ",q+1)
 	    # Combination algorithms
 	    # list of Combination data use to select vm in server p
@@ -160,10 +160,14 @@ def readData(file) :
 if __name__ == "__main__":
 	workload = readData("data/Data.xlsx")
 	# print(workload)
-
+	index_ovsapp = [[0 for j in range(len(workload[i]))] for i in range(len(workload))] 
+	for i in range(len(workload)):
+		for j in range(len(workload[i])):
+			# print(workload[i][j][len(workload[i][j])-1])
+			index_ovsapp[i][j] = len(workload[i][j])-1
 	# keyboard input number of iteration
 	NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
-	NUMBRE_VM_TO_MOVE = int(input("Number of VM to move : "))
+	NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
 	for i in range(NUMBER_OF_ITERATION) :
 		a = find_sum_workload(workload)
 		B = find_max_of_each_server(a)
@@ -225,6 +229,7 @@ if __name__ == "__main__":
 		vm_to_move = []
 		wvm = 0
 		vm_move_in_serverP_per_days = []
+		print("number of vm in server P ",len(workload[index_serverP][j]))
 		for j in range(len(workload[index_serverP])) :
 			# print("j",j)
 			for k in range(len(select_vm)) :
@@ -232,11 +237,12 @@ if __name__ == "__main__":
 				# print(select_vm[k])
 				wvm = workload[index_serverP][j][select_vm[k]]
 				# print(wvm)
-				vm_to_move.append([ select_vm[k] ,workload[index_serverP][j][select_vm[k]] ])
-
-				# move
-
-				workload[index_serverQ][j].append(wvm)
+				if(select_vm[k] == index_ovsapp[index_serverP][j]):
+					print("can't move ovsapp")	
+				else :
+					# move
+					vm_to_move.append([ select_vm[k] ,wvm ])
+					workload[index_serverQ][j].append(wvm)
 				wvm = 0
 			vm_move_in_serverP_per_days.append(vm_to_move)
 			vm_to_move = []
