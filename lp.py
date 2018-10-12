@@ -32,14 +32,17 @@ def readData(file) :
 
 if __name__ == "__main__":
     WORKLOAD = pd.DataFrame.from_csv('Data/workload_per_days.csv',index_col = ['vm','day'])
-    pprint(WORKLOAD);
-    W = pulp.LpVariable.dicts("W",
-                                     ((vm, day) for vm, day in WORKLOAD.index),
-                                     lowBound=0,
-                                     cat='Continuous')
-    pprint(W)
-    X = pulp.LpVariable.dicts("X",
-                                     ((vm, server) for vm in range(VM) for server in range(SERVERS)),
-                                     cat='Binary')
-    pprint(X)
-    
+    print(WORKLOAD);
+    print(WORKLOAD)
+    # W = pulp.LpVariable.dicts("W",
+    #                                  ((vm, day) for vm, day in WORKLOAD.index),
+    #                                  lowBound=0,
+    #                                  cat='Continuous')
+    # pprint(W)
+    # X = pulp.LpVariable.dicts("X",
+    #                                  ((vm, server) for vm in range(VM) for server in range(SERVERS)),
+    #                                  cat='Binary')
+    # pprint(X)
+
+    # define obj function
+    # model = pulp.lpSum(
