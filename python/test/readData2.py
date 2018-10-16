@@ -1,22 +1,13 @@
-from openpyxl import load_workbook
 from pprint import pprint
-wb = load_workbook(filename='../../data/workload.xlsx')
+import pandas as pd
 
 servers = []
 days = []
 vm = []
 for i in range(4):
-	ws = wb['Sheet'+str(i+1)]
-	for column in ws.columns:
-	    for cell in column:
-	        # print(cell.value)
-	        vm.append(cell.value)
-
-	    # print(vm)
-	    days.append(vm)
-	    vm = []
-	# print(days)
-	servers.append(days)
-	days = []
+	df = pd.read_excel('../../data/workload.xlsx',sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
+	servers.append(df)
 print("result : ")
-pprint(servers)
+print(servers)
+
+# pprint(servers)
