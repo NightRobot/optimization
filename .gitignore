@@ -12,7 +12,25 @@ Icon
 
 # Thumbnails
 ._*
+*.tmp
 
+# Word temporary
+~$*.doc*
+
+# Word Auto Backup File
+Backup of *.doc*
+
+# Excel temporary
+~$*.xls*
+
+# Excel Backup File
+*.xlk
+
+# PowerPoint temporary
+~$*.ppt*
+
+# Visio autosave temporary files
+*.~vsd*
 # Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
