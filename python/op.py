@@ -56,7 +56,7 @@ def iteration_calculate(workloads):
     B_tmp = find_max_of_each_server(a_tmp)
 
     # print("avg")
-    avg_WVM_tmp = find_avg_of_wvm_per_server(workloads)
+    # avg_WVM_tmp = find_avg_of_wvm_per_server(workloads)
     # print(avg_WVM_tmp)
     
     # print("sort")
