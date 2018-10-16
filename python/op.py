@@ -80,8 +80,10 @@ def iteration_calculate(workload):
         # list of Combination data use to select vm in server p
         combination = list(combinations(range(VM_in_serverP),q+1))
         combi_num = 0
+        print("number of combination is ",len(combination))
         # print("start iteration")
-        while MAX_WORKLOAD_OF_SERVER_CURRENT > MAX_WORKLOAD_OF_SERVER_NEW :
+        for num in range(len(combination)) :
+        # while MAX_WORKLOAD_OF_SERVER_CURRENT > MAX_WORKLOAD_OF_SERVER_NEW :
             # print('Combination ',combination[pointer])
             # print('range ',len(combination[pointer]))
             a_tmp = find_sum_workload(workload)
