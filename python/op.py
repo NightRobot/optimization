@@ -9,20 +9,25 @@ SERVERS = 4
 DAYS = 3
 NUMBER_OF_ITERATION = 0
 NUMBER_VM_TO_MOVE = 2
-def find_sum_workload(workload) :
+INDEX_OVSAAPP = []
+OVSAPP = [[3.944,3.989,4.129]
+         ,[3.911,3.823,3.808]
+         ,[1.606,1.74,1.149]
+         ,[2.208,2.678,2.678]]
+def find_sum_workloads(workloads) :
     tmp = 0
-    a = [[0 for j in range(len(workload[i]))] for i in range(len(workload))] 
+    a = [[0 for j in range(len(workloads[i]))] for i in range(len(workloads))] 
     # print(a)
-    for i in range(len(workload)) :
-        for j in range(len(workload[i])) :
-            # tmp = np.amax(workload[i][j])
-            for k in range(len(workload[i][j])) :
+    for i in range(len(workloads)) :
+        for j in range(len(workloads[i])) :
+            # tmp = np.amax(workloads[i][j])
+            for k in range(len(workloads[i][j])) :
 
-                tmp = tmp + workload[i][j][k]
+                tmp = tmp + workloads[i][j][k]
 
             # print(tmp)
             # print(i,j)
-            a[i][j] = tmp
+            a[i][j] = tmp + OVSAPP[i][j]
             tmp = 0
     return a
 def find_max_of_each_server(a):
@@ -31,27 +36,27 @@ def find_max_of_each_server(a):
         B[i] = max(a[i])
     return B
 
-def find_avg_of_wvm_per_server(workload) :
+def find_avg_of_wvm_per_server(workloads) :
     
     avg_vm = 0
     tmp = 0
-    avg_WVM = [[0 for k in range(len(workload[i][0]))] for i in range(len(workload))]
-    for i in range(len(workload)) :
-        for k in range(len(workload[i][0])) :
-            tmp = tmp + workload[i][0][k] + workload[i][1][k] + workload[i][2][k] 
+    avg_WVM = [[0 for k in range(len(workloads[i][0]))] for i in range(len(workloads))]
+    for i in range(len(workloads)) :
+        for k in range(len(workloads[i][0])) :
+            tmp = tmp + workloads[i][0][k] + workloads[i][1][k] + workloads[i][2][k] 
             # print(tmp)
             avg_vm = tmp/3
             avg_WVM[i][k] = avg_vm
             tmp = 0
     return avg_WVM
     
-def iteration_calculate(workload):
+def iteration_calculate(workloads):
     # # create tmp variable
-    a_tmp = find_sum_workload(workload)
+    a_tmp = find_sum_workloads(workloads)
     B_tmp = find_max_of_each_server(a_tmp)
 
     # print("avg")
-    avg_WVM_tmp = find_avg_of_wvm_per_server(workload)
+    avg_WVM_tmp = find_avg_of_wvm_per_server(workloads)
     # print(avg_WVM_tmp)
     
     # print("sort")
@@ -59,19 +64,19 @@ def iteration_calculate(workload):
     # print(sort_avg_WVM)
 
     ### fix bug sort
-    avg_WVM_tmp = find_avg_of_wvm_per_server(workload)
+    avg_WVM_tmp = find_avg_of_wvm_per_server(workloads)
 
     P = max(B_tmp)
     index_serverP = B_tmp.index(P)
     Q = min(B_tmp)
     index_serverQ = B_tmp.index(Q)
-    # list_workload_tmp = np.array(workload_tmp).tolist()
+    # list_workloads_tmp = np.array(workloads_tmp).tolist()
 
     MAX_WORKLOAD_OF_SERVER_CURRENT = P
     # print("current MAX : ",MAX_WORKLOAD_OF_SERVER_CURRENT)
     MAX_WORKLOAD_OF_SERVER_NEW = 0
 
-    VM_in_serverP = len(workload[index_serverP][0])
+    VM_in_serverP = len(workloads[index_serverP][0])
     save = []
     # print("move ",index_serverP,"to ",index_serverQ)
     for q in range(NUMBER_VM_TO_MOVE):
@@ -80,13 +85,13 @@ def iteration_calculate(workload):
         # list of Combination data use to select vm in server p
         combination = list(combinations(range(VM_in_serverP),q+1))
         combi_num = 0
-        print("number of combination is ",len(combination))
+        # print("number of combination is ",len(combination))
         # print("start iteration")
         for num in range(len(combination)) :
         # while MAX_WORKLOAD_OF_SERVER_CURRENT > MAX_WORKLOAD_OF_SERVER_NEW :
             # print('Combination ',combination[pointer])
             # print('range ',len(combination[pointer]))
-            a_tmp = find_sum_workload(workload)
+            a_tmp = find_sum_workloads(workloads)
             if MAX_WORKLOAD_OF_SERVER_NEW != 0 :
                 MAX_WORKLOAD_OF_SERVER_CURRENT = MAX_WORKLOAD_OF_SERVER_NEW
             # print("current workload compare ",MAX_WORKLOAD_OF_SERVER_CURRENT)
@@ -103,17 +108,23 @@ def iteration_calculate(workload):
                 # find vm in server
                 index_vm = avg_WVM_tmp[index_serverP].index(select_value)
                 
+                vm_list.append(index_vm)
+                for j in range(len(workloads[index_serverP])) :
+                    # print("move workload vm ",index_vm,workload[index_serverP][j][index_vm])
+                    
+                    a_tmp[index_serverQ][j] = a_tmp[index_serverQ][j] + workloads[index_serverP][j][index_vm]
+                    a_tmp[index_serverP][j] = a_tmp[index_serverP][j] - workloads[index_serverP][j][index_vm]
                 # print(index_vm)
                 # print(len(avg_WVM_tmp[index_serverP])-1)
-                if index_vm == len(avg_WVM_tmp[index_serverP])-1 :
-                    print("don't move ovsapp")
-                else :
-                    vm_list.append(index_vm)
-                    for j in range(len(workload[index_serverP])) :
-                        print("move workload vm ",index_vm,workload[index_serverP][j][index_vm])
+                # if index_vm == INDEX_OVSAAPP[index_serverP] :
+                #     print("don't move ovsapp")
+                # else :
+                #     vm_list.append(index_vm)
+                #     for j in range(len(workloads[index_serverP])) :
+                #         # print("move workload vm ",index_vm,workload[index_serverP][j][index_vm])
                         
-                        a_tmp[index_serverQ][j] = a_tmp[index_serverQ][j] + workload[index_serverP][j][index_vm]
-                        a_tmp[index_serverP][j] = a_tmp[index_serverP][j] - workload[index_serverP][j][index_vm]
+                #         a_tmp[index_serverQ][j] = a_tmp[index_serverQ][j] + workloads[index_serverP][j][index_vm]
+                #         a_tmp[index_serverP][j] = a_tmp[index_serverP][j] - workloads[index_serverP][j][index_vm]
             # print("new a")
             # print(a_tmp)
 
@@ -127,14 +138,14 @@ def iteration_calculate(workload):
 
             combi_num = combi_num + 1
         
-        a_tmp = find_sum_workload(workload)
+        a_tmp = find_sum_workloads(workloads)
         B_tmp = find_max_of_each_server(a_tmp)
         MAX_WORKLOAD_OF_SERVER_CURRENT = P   
         MAX_WORKLOAD_OF_SERVER_NEW = 0
         
         #     MAX_WORKLOAD_OF_SERVER_NEW = 1000
         # break
-    a = find_sum_workload(workload)
+    a = find_sum_workloads(workloads)
     B = find_max_of_each_server(a)
     return save
 
@@ -167,23 +178,24 @@ def readData(file) :
     return servers
     
 if __name__ == "__main__":
-
-    
-    workload = readData("../data/Data.xlsx")
+    workloads = readData("../data/Data.xlsx")
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
+    
+   
+            
     start = time.time()
     for i in range(NUMBER_OF_ITERATION) :
-        a = find_sum_workload(workload)
+        a = find_sum_workloads(workloads)
         B = find_max_of_each_server(a)
-        # print("before move")
-        # pprint(a)
-        # pprint(B)
+        print("before move")
+        pprint(a)
+        pprint(B)
 
         """
         print("avg")
-        avg_WVM = find_avg_of_wvm_per_server(workload)
+        avg_WVM = find_avg_of_wvm_per_server(workloads)
         print(avg_WVM)
         
         print("sort")
@@ -191,7 +203,7 @@ if __name__ == "__main__":
         print(sort_avg_WVM)
         """
 
-        # Maximum workload P
+        # Maximum workloads P
         P = max(B)
         index_serverP = B.index(P)
         # print(P)
@@ -205,7 +217,7 @@ if __name__ == "__main__":
         print("move from ",index_serverP,"to ",index_serverQ)
         print("running iteration "+str(i+1)+ "!!!")
 
-        save = iteration_calculate(workload)
+        save = iteration_calculate(workloads)
 
         # print("iteration done!!!")
 
@@ -228,31 +240,25 @@ if __name__ == "__main__":
         # check name of vm that selected
         num = 0
         select_vm = select[0]
-        # print("select vm ",select_vm)
+        print("select vm ",select_vm)
 
         # print("move vm instruction")
-        
 
         ### move vm from serverP to serverQ
         vm_to_move = []
         wvm = 0
         vm_move_in_serverP_per_days = []
-        # print("number of vm in server P ",len(workload[index_serverP][j]))
-        for j in range(len(workload[index_serverP])) :
+        # print("number of vm in server P ",len(workloads[index_serverP][j]))
+        for j in range(len(workloads[index_serverP])) :
             # print("j",j)
             for k in range(len(select_vm)) :
                 # print("k",k)
                 # print(select_vm[k])
-                wvm = workload[index_serverP][j][select_vm[k]]
+                wvm = workloads[index_serverP][j][select_vm[k]]
                 # print(wvm)
                 vm_to_move.append([ select_vm[k] ,wvm ])
-                workload[index_serverQ][j].append(wvm)
-                # if(select_vm[k] == index_ovsapp[index_serverP][j]):
-                #     print("can't move ovsapp")    
-                # else :
-                #     # move
-                #     vm_to_move.append([ select_vm[k] ,wvm ])
-                #     workload[index_serverQ][j].append(wvm)
+                workloads[index_serverQ][j].append(wvm)
+                
                 wvm = 0
             vm_move_in_serverP_per_days.append(vm_to_move)
             vm_to_move = []
@@ -264,16 +270,19 @@ if __name__ == "__main__":
             for k in range(len(vm_move_in_serverP_per_days[j])):
                 # print(vm_move_in_serverP_per_days[j][k])
                 # remove
-                workload[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
+                workloads[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
 
+                
+                
 
-        # print("new workload")        
-        # pprint(workload)
-        a = find_sum_workload(workload)
+        # print("new workloads")        
+        # pprint(workloads)
+        a = find_sum_workloads(workloads)
         print("after move ")
         pprint(a) # calculate aij
         B = find_max_of_each_server(a)
         pprint(B) # bij
+        print("------------------------------------------------------")
 
     end = time.time()
     print(end - start)
