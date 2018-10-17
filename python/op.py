@@ -2,11 +2,10 @@ import random,time
 import numpy as np
 import pandas as pd
 from itertools import combinations
-from openpyxl import load_workbook,Workbook
 from pprint import pprint
 
 SERVERS = 4
-DAYS = 3
+DAYS = [16,28,31]
 NUMBER_OF_ITERATION = 0
 NUMBER_VM_TO_MOVE = 2
 OVSAPP = [[3.944,3.989,4.129]
@@ -14,6 +13,7 @@ OVSAPP = [[3.944,3.989,4.129]
          ,[1.606,1.74,1.149]
          ,[2.208,2.678,2.678]]
 LIST_NAME_VM = []
+RELOCATE_VM = []
 def find_sum_workloads(workloads) :
     tmp = 0
     a = [[0 for j in range(len(workloads[i]))] for i in range(len(workloads))] 
@@ -110,7 +110,6 @@ def iteration_calculate(workloads):
                     a_tmp[index_serverP][j] = a_tmp[index_serverP][j] - workloads[index_serverP][j][k][0]
             # print("new a")
             # print(a_tmp)
-
             B_tmp = find_max_of_each_server(a_tmp)
             MAX_WORKLOAD_OF_SERVER_NEW = max(B_tmp)
             # print("current MAX NEW : ",MAX_WORKLOAD_OF_SERVER_NEW)
@@ -142,19 +141,18 @@ def sort_wvm(data):
     return data
 
 def readData(file) :
-    wb = load_workbook(filename=file)
     servers = []
     days = []
     vm = []
     data = []
     index = 0
-    for i in range(SERVERS):
-        ws = wb['Sheet'+str(i+1)]
-        for column in ws.columns:
-            for cell in column:
-                # print(cell.value)
-                data.append(float(cell.value))
-                data.append(LIST_NAME_VM[i]["name"][index])
+    for i in range(4):
+        df = pd.read_excel(file,sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
+        for j in range(len(DAYS)):
+            for k in range( len ( df[DAYS[j]] )):
+                # print(df[DAYS[j]][k])
+                data.append(float(df[DAYS[j]][k]))
+                data.append(df["name"][k])
                 vm.append(data)
                 data = []
                 index += 1
@@ -169,11 +167,7 @@ def readData(file) :
     return servers
     
 if __name__ == "__main__":
-    ### list name of vm in servers
-    for i in range(4):
-        df = pd.read_excel('../data/workload.xlsx',sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
-        LIST_NAME_VM.append(df)
-    workloads = readData("../data/Data.xlsx")
+    workloads = readData("../data/workload.xlsx")
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
@@ -185,8 +179,8 @@ if __name__ == "__main__":
         a = find_sum_workloads(workloads)
         B = find_max_of_each_server(a)
         # print("before move")
-        # pprint(a)
-        # pprint(B)
+        pprint(a)
+        pprint(B)
 
         """
         print("avg")
@@ -220,13 +214,7 @@ if __name__ == "__main__":
         # print("select vm to best move in iteration")
         # pprint(save)
         # condition to stop continue iteration
-        
-        ### old con
-        # if len(save) == 0 :
-        #     print("can't move vm for best max")
-        #     break
-        
-        
+
         select = save[0]
         compare = []
         for n in range(len(save)):
@@ -238,13 +226,13 @@ if __name__ == "__main__":
         # check name of vm that selected
         num = 0
         select_vm = select[0]
-        # print("select vm ",select_vm)
+        print("select vm ",select_vm)
         # print("max workload in iteration ",select[1])
         if select[1] > max(B) :
             print("can't move vm for best max")
             break
         # print("move vm instruction")
-        list_move_vm = []
+        # RELOCATE_VM.append(select_vm)
 
         ### move vm from serverP to serverQ
         vm_to_move = []
@@ -274,6 +262,11 @@ if __name__ == "__main__":
                 # remove
                 workloads[index_serverP][j].remove(vm_move_in_serverP_per_days[j][k][1])
         
+        list_of_vm = []
+        for k in range(len(select_vm)) :
+                list_of_vm.append([ select_vm[k][1] ])
+        RELOCATE_VM.append([list_of_vm,str(index_serverP)+" move to "+str(index_serverQ)])
+        list_of_vm = []
         # a = find_sum_workloads(workloads)
         # print("after move ")
         # pprint(a) # calculate aij
@@ -286,11 +279,19 @@ if __name__ == "__main__":
         # print("new workloads")        
         # pprint(workloads)
 
+    print("-------------------------------------------------------------------------")
     print("result : ")
     a = find_sum_workloads(workloads)
-    pprint(a) # calculate aij
+    # pprint(a) # calculate aij
     B = find_max_of_each_server(a)
     pprint(B) # bij
+    print(max(B))
+    print("Number of Iteration is ",len(RELOCATE_VM))
+    print("vm to Relocate ")
+    pprint(RELOCATE_VM)
+    # for i in range(SERVERS):
+    #     print("server ",i)
+    #     pprint(workloads[i][0])
     
     end = time.time()
-    print(end - start)
+    print("Executed time ",end - start)
