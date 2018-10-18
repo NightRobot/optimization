@@ -14,6 +14,18 @@ OVSAPP = [[3.944,3.989,4.129]
          ,[2.208,2.678,2.678]]
 LIST_NAME_VM = []
 RELOCATE_VM = []
+REDUNDANCE = [  ["mymodockerhqnode01","mymodockerhqnode02","mymodockerhqnode03"],
+                ["mymodockerhqnode04","mymodockerhqnode05"],
+                ["gsbsmdhqdocker01","gsbsmdhqdocker02","gsbsmdhqdocker03"],
+                ["gsbsmdhqdocker04","gsbsmdhqdocker05","gsbsmdhqdocker06"],
+                ["gsbsmdhqdocker07","gsbsmdhqdocker08"],
+                ["emmwebdc01","emmwebdc02"],
+                ["emmappdc01","emmappdc02"],
+                ["elkdbhq01","elkdbhq02"],
+                ["elkapphq01","elkapphq02","elkapphq03"],
+                ["gsbmymohqweb07&app01","gsbmymohqweb02&app02","gsbmymohqapp05"],
+                ["gsbmymohqweb03&app03","gsbmymohqweb04&app04"]
+]
 def find_sum_workloads(workloads) :
     tmp = 0
     a = [[0 for j in range(len(workloads[i]))] for i in range(len(workloads))] 
@@ -49,7 +61,31 @@ def find_avg_of_wvm_per_server(workloads) :
             avg_WVM[i][k] = avg_vm
             tmp = 0
     return avg_WVM
-    
+def readData(file) :
+    servers = []
+    days = []
+    vm = []
+    data = []
+    index = 0
+    for i in range(SERVERS):
+        df = pd.read_excel(file,sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
+        for j in range(len(DAYS)):
+            for k in range( len ( df[DAYS[j]] )):
+                # print(df[DAYS[j]][k])
+                data.append(float(df[DAYS[j]][k]))
+                data.append(df["name"][k])
+                vm.append(data)
+                data = []
+                index += 1
+            index = 0
+            # print(vm)
+            days.append(vm)
+            vm = []
+        # print(days)
+        servers.append(days)
+        days = []
+    # pprint(servers)
+    return servers
 def iteration_calculate(workloads):
     # # create tmp variable
     a_tmp = find_sum_workloads(workloads)
@@ -133,54 +169,61 @@ def iteration_calculate(workloads):
     B = find_max_of_each_server(a)
     return save
 
-def sort_wvm(data):
-    for i in range(len(data)):
-        # print(data[i])
-        data[i].sort()
-    # print(sort_avg_WVM)        
-    return data
-
-def readData(file) :
-    servers = []
-    days = []
-    vm = []
-    data = []
-    index = 0
-    for i in range(4):
-        df = pd.read_excel(file,sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
-        for j in range(len(DAYS)):
-            for k in range( len ( df[DAYS[j]] )):
-                # print(df[DAYS[j]][k])
-                data.append(float(df[DAYS[j]][k]))
-                data.append(df["name"][k])
-                vm.append(data)
-                data = []
-                index += 1
-            index = 0
-            # print(vm)
-            days.append(vm)
-            vm = []
-        # print(days)
-        servers.append(days)
-        days = []
-    # pprint(servers)
-    return servers
+# check redundance for vm that need to move
+def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
+    redun = False
+    con = 0
+    # pprint(REDUNDANCE)
+    # print(workloads[serverP][0])
+    # print("list vm to move")
+    # print(list_vm_to_move)
     
+    for vm in list_vm_to_move :
+        name = vm[1]
+        con = 0
+        # print(name)
+        for i in range(len(REDUNDANCE)) :
+            # print(REDUNDANCE[i])
+            # Check redundance list
+            found = name in REDUNDANCE[i]
+            if found == True :
+                # print("in redundance list ")
+                # print(i)
+                for vm in workloads[index_serverQ][0]:
+                    # print(k[1])
+                    found = vm[1] in REDUNDANCE[i]
+                    if found == True :
+                        con += 1
+                        break
+                if con >= 1 :
+                    # print("dont move ")
+                    redun = False
+                    break
+                else :
+                    # print("can move ")
+                    redun = True
+                con = 0
+            else :
+                # print("not in redundance list ")
+                redun = True
+        if con >= 1 :
+            break
+    return redun
+
+
 if __name__ == "__main__":
-    workloads = readData("../data/workload.xlsx")
+    workloads = readData("../data/workloadredun.xlsx")
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
-    
+    print("-------------------------------------------------------------------------")
     # pprint(workloads) 
+    
     start = time.time()
     
     for i in range(NUMBER_OF_ITERATION) :
         a = find_sum_workloads(workloads)
         B = find_max_of_each_server(a)
-        # print("before move")
-        pprint(a)
-        pprint(B)
 
         """
         print("avg")
@@ -205,7 +248,9 @@ if __name__ == "__main__":
         # print(index_serverQ)
         print("running iteration "+str(i+1)+ "!!!")
         print("move from ",index_serverP,"to ",index_serverQ)
-        
+        # print("before move")
+        # pprint(a)
+        # pprint(B)
 
         save = iteration_calculate(workloads)
 
@@ -219,14 +264,24 @@ if __name__ == "__main__":
         compare = []
         for n in range(len(save)):
             compare = save[n]
-            # print(select[1],"vs",compare[1])
+            # print(select,"vs",compare)
             if select[1] > compare[1] :
-                select = compare
-        print(select)
+                # select = compare
+                # print("check redun")
+                if redun(workloads,index_serverP,index_serverQ,compare[0]) == True :
+                    # print("can move")
+                    select = compare
+                    # print(select)
+                # else :
+                    # print("dont move")
+                    # print(compare)
+                    # print("")
+        
+        # print(select)
         # check name of vm that selected
         num = 0
         select_vm = select[0]
-        # print("select vm ",select_vm)
+        print("select vm ",select_vm)
         # print("max workload in iteration ",select[1])
         if select[1] > max(B) :
             print("can't move vm for best max")
@@ -267,13 +322,12 @@ if __name__ == "__main__":
                 list_of_vm.append([ select_vm[k][1] ])
         RELOCATE_VM.append([list_of_vm,str(index_serverP)+" move to "+str(index_serverQ)])
         list_of_vm = []
-        # a = find_sum_workloads(workloads)
-        # print("after move ")
-        # pprint(a) # calculate aij
-        # B = find_max_of_each_server(a)
-        # pprint(B) # bij
-        # print("------------------------------------------------------")
-                
+        a = find_sum_workloads(workloads)
+        print("after move ")
+        pprint(a) # calculate aij
+        B = find_max_of_each_server(a)
+        pprint(B) # bij
+        print("-------------------------------------------------------------------------")
                 
 
         # print("new workloads")        
