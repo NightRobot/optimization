@@ -49,7 +49,32 @@ def find_avg_of_wvm_per_server(workloads) :
             avg_WVM[i][k] = avg_vm
             tmp = 0
     return avg_WVM
-    
+
+def readData(file) :
+    servers = []
+    days = []
+    vm = []
+    data = []
+    index = 0
+    for i in range(4):
+        df = pd.read_excel(file,sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
+        for j in range(len(DAYS)):
+            for k in range( len ( df[DAYS[j]] )):
+                # print(df[DAYS[j]][k])
+                data.append(float(df[DAYS[j]][k]))
+                data.append(df["name"][k])
+                vm.append(data)
+                data = []
+                index += 1
+            index = 0
+            # print(vm)
+            days.append(vm)
+            vm = []
+        # print(days)
+        servers.append(days)
+        days = []
+    # pprint(servers)
+    return servers    
 def iteration_calculate(workloads):
     # # create tmp variable
     a_tmp = find_sum_workloads(workloads)
@@ -129,49 +154,16 @@ def iteration_calculate(workloads):
         
         #     MAX_WORKLOAD_OF_SERVER_NEW = 1000
         # break
-    a = find_sum_workloads(workloads)
-    B = find_max_of_each_server(a)
+    # a = find_sum_workloads(workloads)
+    # B = find_max_of_each_server(a)
     return save
 
-def sort_wvm(data):
-    for i in range(len(data)):
-        # print(data[i])
-        data[i].sort()
-    # print(sort_avg_WVM)        
-    return data
-
-def readData(file) :
-    servers = []
-    days = []
-    vm = []
-    data = []
-    index = 0
-    for i in range(4):
-        df = pd.read_excel(file,sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
-        for j in range(len(DAYS)):
-            for k in range( len ( df[DAYS[j]] )):
-                # print(df[DAYS[j]][k])
-                data.append(float(df[DAYS[j]][k]))
-                data.append(df["name"][k])
-                vm.append(data)
-                data = []
-                index += 1
-            index = 0
-            # print(vm)
-            days.append(vm)
-            vm = []
-        # print(days)
-        servers.append(days)
-        days = []
-    # pprint(servers)
-    return servers
-    
 if __name__ == "__main__":
     workloads = readData("../data/workload.xlsx")
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
-    
+    print("-------------------------------------------------------------------------")
     # pprint(workloads) 
     start = time.time()
     
@@ -179,8 +171,8 @@ if __name__ == "__main__":
         a = find_sum_workloads(workloads)
         B = find_max_of_each_server(a)
         # print("before move")
-        pprint(a)
-        pprint(B)
+        # pprint(a)
+        # pprint(B)
 
         """
         print("avg")
@@ -222,7 +214,7 @@ if __name__ == "__main__":
             # print(select[1],"vs",compare[1])
             if select[1] > compare[1] :
                 select = compare
-        print(select)
+        # print(select)
         # check name of vm that selected
         num = 0
         select_vm = select[0]
@@ -269,11 +261,10 @@ if __name__ == "__main__":
         list_of_vm = []
         # a = find_sum_workloads(workloads)
         # print("after move ")
-        # pprint(a) # calculate aij
+        pprint(a) # calculate aij
         # B = find_max_of_each_server(a)
-        # pprint(B) # bij
-        # print("------------------------------------------------------")
-                
+        pprint(B) # bij
+        print("-------------------------------------------------------------------------")
                 
 
         # print("new workloads")        
