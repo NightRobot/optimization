@@ -15,6 +15,18 @@ OVSAPP = [[3.944,3.989,4.129]
 LIST_NAME_VM = []
 RELOCATE_VM = []
 REDUNDANCE = []
+# REDUNDANCE = [  ["mymodockerhqnode01","mymodockerhqnode02","mymodockerhqnode03"],
+#                 ["mymodockerhqnode04","mymodockerhqnode05"],
+#                 ["gsbsmdhqdocker01","gsbsmdhqdocker02","gsbsmdhqdocker03"],
+#                 ["gsbsmdhqdocker04","gsbsmdhqdocker05","gsbsmdhqdocker06"],
+#                 ["gsbsmdhqdocker07","gsbsmdhqdocker08"],
+#                 ["emmwebdc01","emmwebdc02"],
+#                 ["emmappdc01","emmappdc02"],
+#                 ["elkdbhq01","elkdbhq02"],
+#                 ["elkapphq01","elkapphq02","elkapphq03"],
+#                 ["gsbmymohqweb07&app01","gsbmymohqweb02&app02","gsbmymohqapp05"],
+#                 ["gsbmymohqweb03&app03","gsbmymohqweb04&app04"]
+# ]
 def find_sum_workloads(workloads) :
     tmp = 0
     a = [[0 for j in range(len(workloads[i]))] for i in range(len(workloads))] 
@@ -54,7 +66,7 @@ def find_avg_of_wvm_per_server(workloads) :
 def readCSV (filelocate) :
     groups = []
     with open(filelocate, newline='') as csvfile:
-        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in spamreader:
             groups.append(row)
         # print(groups)
@@ -67,7 +79,7 @@ def readData(file) :
     data = []
     index = 0
     for i in range(SERVERS):
-        df = pd.read_excel(file,sheet_name='DC'+str(i+1))
+        df = pd.read_excel(file,sheet_name='DC'+str(i+1)    )
         for j in range(len(DAYS)):
             for k in range( len ( df[DAYS[j]] )):
                 # print(df[DAYS[j]][k])
@@ -173,14 +185,14 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
     redun = False
     con = 0
     # pprint(REDUNDANCE)
-    # print(workloads[serverP][0])
+    # print(workloads[index_serverP][0])
     # print("list vm to move")
     # print(list_vm_to_move)
 
     for vm in list_vm_to_move :
         name = vm[1]
         con = 0
-        # print(name)
+        print(name)
         for i in range(len(REDUNDANCE)) :
             # print(REDUNDANCE[i])
             # Check redundance list
@@ -189,7 +201,7 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
                 # print("in redundance list ")
                 # print(i)
                 for vm in workloads[index_serverQ][0]:
-                    # print(k[1])
+                    # print(vm[1])
                     found = vm[1] in REDUNDANCE[i]
                     if found == True :
                         con += 1
@@ -211,8 +223,10 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
 
 
 if __name__ == "__main__":
-    workloads = readData("../data/workloadredun.xlsx")
+    workloads = readData("../data/workloadredun_v2.xlsx")
+    
     REDUNDANCE = readCSV("../data/redundancylist.csv")
+    # pprint(REDUNDANCE)
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
@@ -248,9 +262,9 @@ if __name__ == "__main__":
         # print(index_serverQ)
         print("running iteration "+str(i+1)+ "!!!")
         print("move from ",index_serverP,"to ",index_serverQ)
-        # print("before move")
-        # pprint(a)
-        # pprint(B)
+        print("before move")
+        pprint(a)
+        pprint(B)
 
         save = iteration_calculate(workloads)
 
@@ -262,11 +276,20 @@ if __name__ == "__main__":
 
         select = save[0]
         compare = []
+        n = 0
+        while redun(workloads,index_serverP,index_serverQ,select[0]) == False :
+            # print("select element can't move")
+            save.pop(0)
+            # print("remove ",save.pop(0))
+            select = save[0]
+            n += 1
+            # print("current select : ",select)
+            
         for n in range(len(save)):
             compare = save[n]
             # print(select,"vs",compare)
             if select[1] > compare[1] :
-                # select = compare
+                select = compare
                 # print("check redun")
                 if redun(workloads,index_serverP,index_serverQ,compare[0]) == True :
                     # print("can move")
