@@ -67,7 +67,7 @@ def readData(file) :
     data = []
     index = 0
     for i in range(SERVERS):
-        df = pd.read_excel(file,sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
+        df = pd.read_excel(file,sheet_name='DC'+str(i+1))
         for j in range(len(DAYS)):
             for k in range( len ( df[DAYS[j]] )):
                 # print(df[DAYS[j]][k])

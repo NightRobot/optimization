@@ -5,7 +5,7 @@ from itertools import combinations
 from pprint import pprint
 
 SERVERS = 4
-DAYS = [16,28,31]
+DAYS = ["sep-16","sep-28","sep-30"]
 NUMBER_OF_ITERATION = 0
 NUMBER_VM_TO_MOVE = 2
 OVSAPP = [[3.944,3.989,4.129]
@@ -57,7 +57,8 @@ def readData(file) :
     data = []
     index = 0
     for i in range(4):
-        df = pd.read_excel(file,sheet_name='DC'+str(i+1), dtype={'name':str, 'id':str,'16':float,'28':float,'31':float})
+        df = pd.read_excel(file,sheet_name='DC'+str(i+1) )
+        # print(df)
         for j in range(len(DAYS)):
             for k in range( len ( df[DAYS[j]] )):
                 # print(df[DAYS[j]][k])
@@ -159,7 +160,7 @@ def iteration_calculate(workloads):
     return save
 
 if __name__ == "__main__":
-    workloads = readData("../data/workload.xlsx")
+    workloads = readData("../data/workload_update_221018.xlsx")
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
@@ -222,6 +223,7 @@ if __name__ == "__main__":
         # print("max workload in iteration ",select[1])
         if select[1] > max(B) :
             print("can't move vm for best max")
+            print("-------------------------------------------------------------------------")
             break
         # print("move vm instruction")
         # RELOCATE_VM.append(select_vm)
@@ -270,19 +272,20 @@ if __name__ == "__main__":
         # print("new workloads")        
         # pprint(workloads)
 
-    print("-------------------------------------------------------------------------")
     print("result : ")
     a = find_sum_workloads(workloads)
     # pprint(a) # calculate aij
     B = find_max_of_each_server(a)
     pprint(B) # bij
     print(max(B))
+    print("-------------------------------------------------------------------------")
     print("Number of Iteration is ",len(RELOCATE_VM))
     print("vm to Relocate ")
     pprint(RELOCATE_VM)
     # for i in range(SERVERS):
     #     print("server ",i)
     #     pprint(workloads[i][0])
-    
+    print("-------------------------------------------------------------------------")
     end = time.time()
     print("Executed time ",end - start)
+    print("-------------------------------------------------------------------------")
