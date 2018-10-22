@@ -1,4 +1,4 @@
-import random,time
+import random,time,csv
 import numpy as np
 import pandas as pd
 from itertools import combinations
@@ -14,18 +14,7 @@ OVSAPP = [[3.944,3.989,4.129]
          ,[2.208,2.678,2.678]]
 LIST_NAME_VM = []
 RELOCATE_VM = []
-REDUNDANCE = [  ["mymodockerhqnode01","mymodockerhqnode02","mymodockerhqnode03"],
-                ["mymodockerhqnode04","mymodockerhqnode05"],
-                ["gsbsmdhqdocker01","gsbsmdhqdocker02","gsbsmdhqdocker03"],
-                ["gsbsmdhqdocker04","gsbsmdhqdocker05","gsbsmdhqdocker06"],
-                ["gsbsmdhqdocker07","gsbsmdhqdocker08"],
-                ["emmwebdc01","emmwebdc02"],
-                ["emmappdc01","emmappdc02"],
-                ["elkdbhq01","elkdbhq02"],
-                ["elkapphq01","elkapphq02","elkapphq03"],
-                ["gsbmymohqweb07&app01","gsbmymohqweb02&app02","gsbmymohqapp05"],
-                ["gsbmymohqweb03&app03","gsbmymohqweb04&app04"]
-]
+REDUNDANCE = []
 def find_sum_workloads(workloads) :
     tmp = 0
     a = [[0 for j in range(len(workloads[i]))] for i in range(len(workloads))] 
@@ -61,6 +50,16 @@ def find_avg_of_wvm_per_server(workloads) :
             avg_WVM[i][k] = avg_vm
             tmp = 0
     return avg_WVM
+
+def readCSV (filelocate) :
+    groups = []
+    with open(filelocate, newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in spamreader:
+            groups.append(row)
+        # print(groups)
+    return groups
+
 def readData(file) :
     servers = []
     days = []
@@ -177,7 +176,7 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
     # print(workloads[serverP][0])
     # print("list vm to move")
     # print(list_vm_to_move)
-    
+
     for vm in list_vm_to_move :
         name = vm[1]
         con = 0
@@ -213,6 +212,7 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
 
 if __name__ == "__main__":
     workloads = readData("../data/workloadredun.xlsx")
+    REDUNDANCE = readCSV("../data/redundancylist.csv")
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
@@ -285,6 +285,7 @@ if __name__ == "__main__":
         # print("max workload in iteration ",select[1])
         if select[1] > max(B) :
             print("can't move vm for best max")
+            print("-------------------------------------------------------------------------")
             break
         # print("move vm instruction")
         # RELOCATE_VM.append(select_vm)
@@ -327,25 +328,30 @@ if __name__ == "__main__":
         pprint(a) # calculate aij
         B = find_max_of_each_server(a)
         pprint(B) # bij
+        print(max(B))
         print("-------------------------------------------------------------------------")
                 
 
         # print("new workloads")        
         # pprint(workloads)
 
-    print("-------------------------------------------------------------------------")
+    
     print("result : ")
     a = find_sum_workloads(workloads)
     # pprint(a) # calculate aij
     B = find_max_of_each_server(a)
     pprint(B) # bij
     print(max(B))
+    print("-------------------------------------------------------------------------")
     print("Number of Iteration is ",len(RELOCATE_VM))
     print("vm to Relocate ")
     pprint(RELOCATE_VM)
+    print("-------------------------------------------------------------------------")
     # for i in range(SERVERS):
     #     print("server ",i)
     #     pprint(workloads[i][0])
     
     end = time.time()
     print("Executed time ",end - start)
+    print("-------------------------------------------------------------------------")
+    
