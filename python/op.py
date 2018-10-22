@@ -5,7 +5,7 @@ from itertools import combinations
 from pprint import pprint
 
 SERVERS = 4
-DAYS = ["sep-16","sep-28","sep-30"]
+DAYS = ["aug-16","aug-28","aug-31"]
 NUMBER_OF_ITERATION = 0
 NUMBER_VM_TO_MOVE = 2
 OVSAPP = [[3.944,3.989,4.129]
