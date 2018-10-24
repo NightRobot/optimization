@@ -192,7 +192,7 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
     for vm in list_vm_to_move :
         name = vm[1]
         con = 0
-        print(name)
+        # print(name)
         for i in range(len(REDUNDANCE)) :
             # print(REDUNDANCE[i])
             # Check redundance list
@@ -223,7 +223,7 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
 
 
 if __name__ == "__main__":
-    workloads = readData("../data/workloadredun_v2.xlsx")
+    workloads = readData("../data/workloadredun_update_221018.xlsx")
     
     REDUNDANCE = readCSV("../data/redundancylist.csv")
     # pprint(REDUNDANCE)
@@ -344,7 +344,7 @@ if __name__ == "__main__":
         list_of_vm = []
         for k in range(len(select_vm)) :
                 list_of_vm.append([ select_vm[k][1] ])
-        RELOCATE_VM.append([list_of_vm,str(index_serverP)+" move to "+str(index_serverQ)])
+        RELOCATE_VM.append([list_of_vm,str(index_serverP+1)+" move to "+str(index_serverQ+1)])
         list_of_vm = []
         a = find_sum_workloads(workloads)
         print("after move ")
