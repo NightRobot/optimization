@@ -171,39 +171,28 @@ if __name__ == "__main__":
     for i in range(NUMBER_OF_ITERATION) :
         a = find_sum_workloads(workloads)
         B = find_max_of_each_server(a)
-        # print("before move")
-        # pprint(a)
-        # pprint(B)
-
-        """
-        print("avg")
-        avg_WVM = find_avg_of_wvm_per_server(workloads)
-        print(avg_WVM)
-        
-        print("sort")
-        sort_avg_WVM = sort_wvm(avg_WVM)
-        print(sort_avg_WVM)
-        """
+        print("before move")
+        pprint(a)
+        pprint(B)
 
         # Maximum workloads P
         P = max(B)
         index_serverP = B.index(P)
         # print(P)
         # print(index_serverP)
+
         # Minimum wokload Q
-        
         Q = min(B)
         index_serverQ = B.index(Q)
         # print(Q)
         # print(index_serverQ)
+
         print("running iteration "+str(i+1)+ "!!!")
         print("move from ",index_serverP,"to ",index_serverQ)
         
-
         save = iteration_calculate(workloads)
 
         # print("iteration done!!!")
-
         # print("select vm to best move in iteration")
         # pprint(save)
         # condition to stop continue iteration
