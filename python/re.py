@@ -15,18 +15,7 @@ OVSAPP = [[3.944,3.989,4.129]
 LIST_NAME_VM = []
 RELOCATE_VM = []
 REDUNDANCE = []
-# REDUNDANCE = [  ["mymodockerhqnode01","mymodockerhqnode02","mymodockerhqnode03"],
-#                 ["mymodockerhqnode04","mymodockerhqnode05"],
-#                 ["gsbsmdhqdocker01","gsbsmdhqdocker02","gsbsmdhqdocker03"],
-#                 ["gsbsmdhqdocker04","gsbsmdhqdocker05","gsbsmdhqdocker06"],
-#                 ["gsbsmdhqdocker07","gsbsmdhqdocker08"],
-#                 ["emmwebdc01","emmwebdc02"],
-#                 ["emmappdc01","emmappdc02"],
-#                 ["elkdbhq01","elkdbhq02"],
-#                 ["elkapphq01","elkapphq02","elkapphq03"],
-#                 ["gsbmymohqweb07&app01","gsbmymohqweb02&app02","gsbmymohqapp05"],
-#                 ["gsbmymohqweb03&app03","gsbmymohqweb04&app04"]
-# ]
+""
 def find_sum_workloads(workloads) :
     tmp = 0
     a = [[0 for j in range(len(workloads[i]))] for i in range(len(workloads))] 
@@ -82,7 +71,7 @@ def readData(file) :
         df = pd.read_excel(file,sheet_name='DC'+str(i+1)    )
         for j in range(len(DAYS)):
             for k in range( len ( df[DAYS[j]] )):
-                # print(df[DAYS[j]][k])
+                print(df[DAYS[j]][k])
                 data.append(float(df[DAYS[j]][k]))
                 data.append(df["name"][k])
                 vm.append(data)
@@ -133,6 +122,8 @@ def iteration_calculate(workloads):
         combi_num = 0
         # print("number of combination is ",len(combination))
         # print("start iteration")
+        
+        # start iteration
         for num in range(len(combination)) :
         # while MAX_WORKLOAD_OF_SERVER_CURRENT > MAX_WORKLOAD_OF_SERVER_NEW :
             # print('Combination ',combination[pointer])
@@ -141,6 +132,7 @@ def iteration_calculate(workloads):
             if MAX_WORKLOAD_OF_SERVER_NEW != 0 :
                 MAX_WORKLOAD_OF_SERVER_CURRENT = MAX_WORKLOAD_OF_SERVER_NEW
             # print("current workload compare ",MAX_WORKLOAD_OF_SERVER_CURRENT)
+            
             # combination loop to test selection
             vm_list = []
             # print(combination[combi_num]) 
@@ -223,7 +215,7 @@ def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
 
 
 if __name__ == "__main__":
-    workloads = readData("../data/workloadredun_update_221018.xlsx")
+    workloads = readData("../data/workloadredun_update_241018.xlsx")
     
     REDUNDANCE = readCSV("../data/redundancylist.csv")
     # pprint(REDUNDANCE)
@@ -295,7 +287,7 @@ if __name__ == "__main__":
                     # print("can move")
                     select = compare
                     # print(select)
-                # else :
+                else :
                     # print("dont move")
                     # print(compare)
                     # print("")
