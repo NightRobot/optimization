@@ -1,11 +1,11 @@
-import random,time
+import random,time,csv
 import numpy as np
 import pandas as pd
 from itertools import combinations
 from pprint import pprint
 
 SERVERS = 4
-DAYS = ["aug-16","aug-28","aug-31"]
+DAYS = [16,28,31]
 NUMBER_OF_ITERATION = 0
 NUMBER_VM_TO_MOVE = 2
 OVSAPP = [[3.944,3.989,4.129]
@@ -14,6 +14,8 @@ OVSAPP = [[3.944,3.989,4.129]
          ,[2.208,2.678,2.678]]
 LIST_NAME_VM = []
 RELOCATE_VM = []
+REDUNDANCE = []
+""
 def find_sum_workloads(workloads) :
     tmp = 0
     a = [[0 for j in range(len(workloads[i]))] for i in range(len(workloads))] 
@@ -50,18 +52,26 @@ def find_avg_of_wvm_per_server(workloads) :
             tmp = 0
     return avg_WVM
 
+def readCSV (filelocate) :
+    groups = []
+    with open(filelocate, newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in spamreader:
+            groups.append(row)
+        # print(groups)
+    return groups
+
 def readData(file) :
     servers = []
     days = []
     vm = []
     data = []
     index = 0
-    for i in range(4):
-        df = pd.read_excel(file,sheet_name='DC'+str(i+1) )
-        # print(df)
+    for i in range(SERVERS):
+        df = pd.read_excel(file,sheet_name='DC'+str(i+1)    )
         for j in range(len(DAYS)):
             for k in range( len ( df[DAYS[j]] )):
-                # print(df[DAYS[j]][k])
+                print(df[DAYS[j]][k])
                 data.append(float(df[DAYS[j]][k]))
                 data.append(df["name"][k])
                 vm.append(data)
@@ -75,7 +85,7 @@ def readData(file) :
         servers.append(days)
         days = []
     # pprint(servers)
-    return servers    
+    return servers
 def iteration_calculate(workloads):
     # # create tmp variable
     a_tmp = find_sum_workloads(workloads)
@@ -112,6 +122,8 @@ def iteration_calculate(workloads):
         combi_num = 0
         # print("number of combination is ",len(combination))
         # print("start iteration")
+        
+        # start iteration
         for num in range(len(combination)) :
         # while MAX_WORKLOAD_OF_SERVER_CURRENT > MAX_WORKLOAD_OF_SERVER_NEW :
             # print('Combination ',combination[pointer])
@@ -120,6 +132,7 @@ def iteration_calculate(workloads):
             if MAX_WORKLOAD_OF_SERVER_NEW != 0 :
                 MAX_WORKLOAD_OF_SERVER_CURRENT = MAX_WORKLOAD_OF_SERVER_NEW
             # print("current workload compare ",MAX_WORKLOAD_OF_SERVER_CURRENT)
+            
             # combination loop to test selection
             vm_list = []
             # print(combination[combi_num]) 
@@ -155,55 +168,130 @@ def iteration_calculate(workloads):
         
         #     MAX_WORKLOAD_OF_SERVER_NEW = 1000
         # break
-    # a = find_sum_workloads(workloads)
-    # B = find_max_of_each_server(a)
+    a = find_sum_workloads(workloads)
+    B = find_max_of_each_server(a)
     return save
 
+# check redundance for vm that need to move
+def redun(workloads,index_serverP,index_serverQ,list_vm_to_move):
+    redun = False
+    con = 0
+    # pprint(REDUNDANCE)
+    # print(workloads[index_serverP][0])
+    # print("list vm to move")
+    # print(list_vm_to_move)
+
+    for vm in list_vm_to_move :
+        name = vm[1]
+        con = 0
+        # print(name)
+        for i in range(len(REDUNDANCE)) :
+            # print(REDUNDANCE[i])
+            # Check redundance list
+            found = name in REDUNDANCE[i]
+            if found == True :
+                # print("in redundance list ")
+                # print(i)
+                for vm in workloads[index_serverQ][0]:
+                    # print(vm[1])
+                    found = vm[1] in REDUNDANCE[i]
+                    if found == True :
+                        con += 1
+                        break
+                if con >= 1 :
+                    # print("dont move ")
+                    redun = False
+                    break
+                else :
+                    # print("can move ")
+                    redun = True
+                con = 0
+            else :
+                # print("not in redundance list ")
+                redun = True
+        if con >= 1 :
+            break
+    return redun
+
+
 if __name__ == "__main__":
-    workloads = readData("../data/workload_update_221018.xlsx")
+    workloads = readData("../data/workloadredun_update_241018.xlsx")
+    
+    REDUNDANCE = readCSV("../data/redundancylist.csv")
+    # pprint(REDUNDANCE)
     # keyboard input number of iteration
     NUMBER_OF_ITERATION = int(input("Number of Iteration : "))
     NUMBER_VM_TO_MOVE = int(input("Number of VM to move : "))
     print("-------------------------------------------------------------------------")
     # pprint(workloads) 
+    
     start = time.time()
     
     for i in range(NUMBER_OF_ITERATION) :
         a = find_sum_workloads(workloads)
         B = find_max_of_each_server(a)
-        print("before move")
-        pprint(a)
-        pprint(B)
+
+        """
+        print("avg")
+        avg_WVM = find_avg_of_wvm_per_server(workloads)
+        print(avg_WVM)
+        
+        print("sort")
+        sort_avg_WVM = sort_wvm(avg_WVM)
+        print(sort_avg_WVM)
+        """
 
         # Maximum workloads P
         P = max(B)
         index_serverP = B.index(P)
         # print(P)
         # print(index_serverP)
-
         # Minimum wokload Q
+        
         Q = min(B)
         index_serverQ = B.index(Q)
         # print(Q)
         # print(index_serverQ)
-
         print("running iteration "+str(i+1)+ "!!!")
         print("move from ",index_serverP,"to ",index_serverQ)
-        
+        print("before move")
+        pprint(a)
+        pprint(B)
+
         save = iteration_calculate(workloads)
 
         # print("iteration done!!!")
+
         # print("select vm to best move in iteration")
         # pprint(save)
         # condition to stop continue iteration
 
         select = save[0]
         compare = []
+        n = 0
+        while redun(workloads,index_serverP,index_serverQ,select[0]) == False :
+            # print("select element can't move")
+            save.pop(0)
+            # print("remove ",save.pop(0))
+            select = save[0]
+            n += 1
+            # print("current select : ",select)
+            
         for n in range(len(save)):
             compare = save[n]
-            # print(select[1],"vs",compare[1])
+            # print(select,"vs",compare)
             if select[1] > compare[1] :
                 select = compare
+                # print("check redun")
+                if redun(workloads,index_serverP,index_serverQ,compare[0]) == True :
+                    # print("can move")
+                    select = compare
+                    # print(select)
+                else :
+                    # print("dont move")
+                    # print(compare)
+                    # print("")
+        
         # print(select)
         # check name of vm that selected
         num = 0
@@ -248,19 +336,21 @@ if __name__ == "__main__":
         list_of_vm = []
         for k in range(len(select_vm)) :
                 list_of_vm.append([ select_vm[k][1] ])
-        RELOCATE_VM.append([list_of_vm,str(index_serverP)+" move to "+str(index_serverQ)])
+        RELOCATE_VM.append([list_of_vm,str(index_serverP+1)+" move to "+str(index_serverQ+1)])
         list_of_vm = []
-        # a = find_sum_workloads(workloads)
-        # print("after move ")
+        a = find_sum_workloads(workloads)
+        print("after move ")
         pprint(a) # calculate aij
-        # B = find_max_of_each_server(a)
+        B = find_max_of_each_server(a)
         pprint(B) # bij
+        print(max(B))
         print("-------------------------------------------------------------------------")
                 
 
         # print("new workloads")        
         # pprint(workloads)
 
+    
     print("result : ")
     a = find_sum_workloads(workloads)
     # pprint(a) # calculate aij
@@ -271,10 +361,12 @@ if __name__ == "__main__":
     print("Number of Iteration is ",len(RELOCATE_VM))
     print("vm to Relocate ")
     pprint(RELOCATE_VM)
+    print("-------------------------------------------------------------------------")
     # for i in range(SERVERS):
     #     print("server ",i)
     #     pprint(workloads[i][0])
-    print("-------------------------------------------------------------------------")
+    
     end = time.time()
     print("Executed time ",end - start)
     print("-------------------------------------------------------------------------")
+    
